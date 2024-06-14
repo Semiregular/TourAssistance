@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" />
+    <meta
+      name="viewport"
+      content="initial-scale = 1.0, user-scalable = no, width = device-width"
+    />
+    <title>地图编辑</title>
+    <script src="./libs/leaflet.js"></script>
+    <script src="./libs/leaflet.geometryutil.js"></script>
+    <script src="./libs/leaflet.snap.js"></script>
+    <script src="./libs/leaflet.draw.js"></script>
+    <script src="./libs/leaflet.markercluster.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        min-width: 200px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      .map {
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+      }
+      .panel {
+        top: 10px;
+        height: 50px;
+        left: 5vw;
+        width: 90vw;
+        position: fixed;
+        z-index: 100;
+        border-radius: 25px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+        background-color: white;
+      }
+      .panel .panel-item {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+      }
+      .note {
+        font-weight: 600;
+        font-size: 18px;
+        color: #079be4;
+        user-select: none;
+        text-align: center;
+        width: 100px;
+      }
+      .prop {
+        width: 250px;
+        height: 30px;
+        display: flex;
+        font-size: 14px;
+        font-weight: 500;
+        user-select: none;
+      }
+      .prop input {
+        outline: none;
+        width: 100px;
+        height: 30px;
+        font-size: 14px;
+        text-indent: 5px;
+        border: 1px solid #66ccff;
+        border-radius: 5px;
+      }
+      .oper {
+        position: fixed;
+        left: 0;
+        width: 80px;
+        top: 15vh;
+        height: 30vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        border-radius: 10px;
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+        background-color: white;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+        z-index: 100;
+      }
+      .oper .op {
+        width: 100%;
+        height: 40px;
+        text-align: center;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        border-radius: 8px;
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        user-select: none;
+      }
+      .op4 {
+        color: rgb(241, 31, 31);
+        font-weight: 600;
+      }
+      .oper .op:hover {
+        background-color: rgb(187, 217, 243);
+        color: #169de1;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        transition: all 0.2s ease;
+      }
+      .oper .op-act {
+        background-color: rgb(187, 217, 243);
+        color: #169de1;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        transition: all 0.2s ease;
+      }
+    </style>
+    <link rel="stylesheet" href="./libs/leaflet.css" />
+    <link rel="stylesheet" href="./libs/leaflet.draw.css" />
+    <link rel="stylesheet" href="./libs/MarkerCluster.css" />
+    <link rel="stylesheet" href="./libs/MarkerCluster.Default.css" />
+  </head>
+  <body>
+    <div class="map" id="map"></div>
+    <div class="oper">
+      <div class="op op0">清空选择</div>
+      <div class="op op7">清空地图</div>
+      <div class="op op1" style="font-weight: 600">画标记点</div>
+      <div class="op op2" style="font-weight: 600">画折线段</div>
+      <div class="op op3">结束线段</div>
+      <div class="op op5" style="font-weight: 600">画多边形</div>
+      <div class="op op6">结束区域</div>
+      <div class="op op4">下载数据</div>
+    </div>
+    <div class="panel">
+      <div class="panel-item panel-item1">
+        <div class="note">标点属性</div>
+        <div class="prop">
+          <label
+            >编号(Id)：<input type="text" value="0" class="point-id"
+          /></label>
+        </div>
+        <div class="prop">
+          <label
+            >类型(Type)：<input
+              type="text"
+              class="point-type"
+              value="1"
+              placeholder="1"
+          /></label>
+        </div>
+        <div class="prop">
+          <label
+            >名称(Name)：<input
+              type="text"
+              class="point-name"
+              placeholder="建筑名称"
+          /></label>
+        </div>
+        <div class="prop">
+          <label
+            >详细信息(Detail)：<input
+              type="text"
+              class="point-detail"
+              placeholder="详细信息"
+          /></label>
+        </div>
+      </div>
+      <div class="panel-item panel-item2">
+        <div class="note">道路属性</div>
+        <div class="prop">
+          <label
+            >编号(Id)：<input type="text" value="0" class="line-id"
+          /></label>
+        </div>
+        <div class="prop">
+          <label
+            >类型(Type)：<input
+              type="text"
+              class="line-type"
+              value="1"
+              placeholder="1"
+          /></label>
+        </div>
+        <div class="prop">
+          <label
+            >名称(Name)：<input
+              type="text"
+              class="line-name"
+              placeholder="道路名称"
+          /></label>
+        </div>
+      </div>
+      <div class="panel-item panel-item3">
+        <div class="note">区域属性</div>
+        <div class="prop">
+          <label
+            >编号(Id)：<input type="text" value="0" class="area-id"
+          /></label>
+        </div>
+        <div class="prop">
+          <label
+            >类型(Type)：<input
+              type="text"
+              class="area-type"
+              value="1"
+              placeholder="1"
+          /></label>
+        </div>
+        <div class="prop">
+          <label
+            >名称(Name)：<input
+              type="text"
+              class="area-name"
+              placeholder="区域名称"
+          /></label>
+        </div>
+      </div>
+    </div>
+    <script>
+      let type = 0;
+
+      let markerSet = [];
+      let polylineSet = [];
+      let polygonSet = [];
+      let markerCluster = new L.MarkerClusterGroup();
+
+      let point = [];
+      let pointId = 1000;
+      let pointType = 1;
+      let pointName = "建筑名称";
+      let pointDetail = "详细描述";
+
+      let line = [];
+      let lineId = 1000;
+      let lineType = 1;
+      let lineName = "道路名称";
+
+      let area = [];
+      let areaId = -1;
+      let areaType = 1;
+      let areaName = "区域名称";
+
+      let oldPoint;
+      let newLineSet = [];
+      let newPolylineSet = [];
+      let newAreaSet = [];
+      let newPolygonSet = [];
+
+      var map = L.map("map", {
+        drawControl: true,
+      }).setView([30.56206500692074, 114.33571306814744], 15);
+
+      var layer = L.tileLayer(
+        "https://dialogue-oss.oss-cn-wulanchabu.aliyuncs.com/wuchang/{z}/{x}/{y}/x={x}&y={y}&z={z}.png",
+        {
+          attribution: "游学地图",
+          minZoom: 15,
+          maxZoom: 17,
+        }
+      ).addTo(map);
+
+      map.on("click", (e) => {
+        if (type === 0) {
+          let latlng = e.latlng;
+          L.popup()
+            .setLatLng(latlng)
+            .setContent(
+              `
+              <div>lat: ${latlng.lat}</div>
+              <div>lng: ${latlng.lng}</div> 
+              `
+            )
+            .openOn(map);
+        }
+        if (type === 1) {
+          let latlng = e.latlng;
+          pointId++;
+          $(".point-id").val(pointId);
+          let p = {
+            id: Number(pointId),
+            type: Number(pointType),
+            lat: latlng.lat,
+            lng: latlng.lng,
+            name: pointName + Math.floor(Math.random() * 10000),
+            detail: pointDetail,
+            pop:  Math.floor(Math.random()*100000),
+            eval: generateIntRandomArray(5),
+            comment: Math.floor(Math.random() * 100),
+            note: Math.floor(Math.random() * 100),
+            noteId: []
+          };
+          point.push(p);
+          let marker = L.marker([p.lat, p.lng], { draggable: false })
+            .addTo(map)
+            .on("move", function (e) {
+              oldPoint = e.oldLatLng;
+            })
+            .on("dragend", function (e) {
+              let latlng = e.target._latlng;
+              let id = getPointId(oldPoint);
+              point[id].lat = latlng.lat;
+              point[id].lng = latlng.lng;
+            })
+            .on("click", function (e) {
+              if (type === 0) {
+                let latlng = e.latlng;
+                let content = changePop(latlng);
+                var popup = L.popup({ offset: [0, -15] })
+                  .setLatLng(latlng)
+                  .setContent(content)
+                  .openOn(map);
+              }
+              if (type === 2) {
+                let latlng = e.latlng;
+                let op = getPointAll(latlng);
+                let p = {
+                  id: op.id,
+                  name: op.name,
+                  lat: latlng.lat,
+                  lng: latlng.lng,
+                };
+                newLineSet.push(p);
+                let polyline = L.polyline(newLineSet, {
+                  color: "#c00808",
+                  weight: 8,
+                }).addTo(map);
+                newPolylineSet.push(polyline);
+              }
+              if (type === 5) {
+                let latlng = e.latlng;
+                let op = getPointAll(latlng);
+                let p = {
+                  id: op.id,
+                  name: op.name,
+                  lat: latlng.lat,
+                  lng: latlng.lng,
+                };
+                newAreaSet.push(p);
+                map.removeLayer(newPolygonSet);
+                let polygon = L.polygon(newAreaSet, {
+                  color: "#66ccff",
+                }).addTo(map);
+                newPolygonSet = polygon;
+              }
+            });
+
+          markerSet.push(marker);
+          markerCluster.addLayer(marker);
+          map.addLayer(markerCluster);
+          marker.snapediting = new L.Handler.MarkerSnap(map, marker);
+          //marker.snapediting.enable();
+          for (let i = 0; i < polylineSet.length; i++) {
+            marker.snapediting.addGuideLayer(polylineSet[i]);
+          }
+          for (let i = 0; i < polygonSet.length; i++) {
+            marker.snapediting.addGuideLayer(polygonSet[i]);
+          }
+        }
+        if (type === 2) {
+          let latlng = e.latlng;
+          let p = { lat: latlng.lat, lng: latlng.lng };
+          newLineSet.push(p);
+          let polyline = L.polyline(newLineSet, {
+            color: "#c00808",
+            weight: 8,
+          }).addTo(map);
+          newPolylineSet.push(polyline);
+        }
+        if (type === 5) {
+          let latlng = e.latlng;
+          let p = { lat: latlng.lat, lng: latlng.lng };
+          newAreaSet.push(p);
+          map.removeLayer(newPolygonSet);
+          let polygon = L.polygon(newAreaSet, { color: "#66ccff" }).addTo(map);
+          newPolygonSet = polygon;
+        }
+      });
+
+      $(".op0").on("click", function () {
+        if (type === 2) {
+          endline();
+        }
+        if (type === 5) {
+          endarea();
+        }
+        type = 0;
+        $(".op").removeClass("op-act");
+      });
+
+      $(".op1").on("click", function () {
+        if (type === 2) {
+          endline();
+        }
+        if (type === 5) {
+          endarea();
+        }
+        type = 1;
+        $(".op").removeClass("op-act");
+        $(".op1").addClass("op-act");
+        $(".panel-item").css("display", "none");
+        $(".panel-item1").css("display", "flex");
+      });
+
+      $(".op2").on("click", function () {
+        type = 2;
+        $(".op").removeClass("op-act");
+        $(".op2").addClass("op-act");
+        $(".panel-item").css("display", "none");
+        $(".panel-item2").css("display", "flex");
+      });
+
+      $(".op3").on("click", function () {
+        type = 0;
+        $(".op").removeClass("op-act");
+        endline();
+      });
+
+      $(".op4").on("click", function () {
+        if (type === 2) {
+          endline();
+        }
+        if (type === 5) {
+          endarea();
+        }
+        type = 0;
+        $(".op").removeClass("op-act");
+        download();
+      });
+
+      $(".op5").on("click", function () {
+        type = 5;
+        $(".op").removeClass("op-act");
+        $(".op5").addClass("op-act");
+        $(".panel-item").css("display", "none");
+        $(".panel-item3").css("display", "flex");
+      });
+
+      $(".op6").on("click", function () {
+        type = 0;
+        $(".op").removeClass("op-act");
+        endarea();
+      });
+
+      $(".op7").on("click", function () {
+        type = 0;
+        $(".op").removeClass("op-act");
+        map.eachLayer(function (layer) {
+          if (layer._path != null) {
+            layer.remove();
+          }
+        });
+        for (let i = 0; i < markerSet.length; i++) {
+          map.removeLayer(markerSet[i]);
+        }
+        map.removeLayer(markerCluster);
+        point = [];
+        line = [];
+        area = [];
+        markerSet = [];
+        polygonSet = [];
+        polylineSet = [];
+        markerCluster = new L.MarkerClusterGroup();
+        newLineSet = [];
+        newPolylineSet = [];
+        newAreaSet = [];
+        newPolygonSet = [];
+        lineId = 0;
+        pointId = 0;
+        areaId = 0;
+        $(".point-id").val(pointId);
+        $(".line-id").val(lineId);
+        $(".area-id").val(areaId);
+      });
+
+      $(".leaflet-draw-section").css("display", "none");
+      $(".panel-item").css("display", "none");
+      $(".panel-item1").css("display", "flex");
+
+      $(".point-name").change(function () {
+        pointName = $(this).val();
+      });
+      $(".point-type").change(function () {
+        pointType = $(this).val();
+      });
+      $(".point-detail").change(function () {
+        pointDetail = $(this).val();
+      });
+      $(".line-name").change(function () {
+        lineName = $(this).val();
+      });
+      $(".line-type").change(function () {
+        lineType = $(this).val();
+      });
+      $(".area-name").change(function () {
+        areaName = $(this).val();
+      });
+      $(".area-type").change(function () {
+        areaType = $(this).val();
+      });
+
+      function download() {
+        var aLink = document.createElement("a");
+        let dataOut = { point: point, line: line, area: area };
+        var file = new File([JSON.stringify(dataOut)], "mapdata.json", {
+          type: "text/plain",
+        });
+        aLink.download = "mapdata";
+        aLink.href = URL.createObjectURL(file);
+        aLink.click();
+      }
+
+      function getPointId(latlng) {
+        for (let i = 0; i < point.length; i++) {
+          if (point[i].lat === latlng.lat && point[i].lng === latlng.lng) {
+            let res = i;
+            return res;
+          }
+        }
+        return -1;
+      }
+
+      function getPointAll(latlng) {
+        for (let i = 0; i < point.length; i++) {
+          if (point[i].lat === latlng.lat && point[i].lng === latlng.lng) {
+            return point[i];
+          }
+        }
+        return -1;
+      }
+
+      function changePop(latlng) {
+        for (let i = 0; i < point.length; i++) {
+          if (point[i].lat === latlng.lat && point[i].lng === latlng.lng) {
+            let p = point[i];
+            let content = `
+                  <div>id: ${p.id}</div>
+                  <div>type: ${p.type}</div>
+                  <div>name: ${p.name}</div>
+                  <div>lat: ${p.lat}</div>
+                  <div>lng: ${p.lng}</div>       
+                  <div>detail: ${p.detail}</div>
+                  `;
+            return content;
+          }
+        }
+      }
+
+      function endline() {
+        lineId++;
+        $(".line-id").val(lineId);
+        let l = {
+          id: Number(lineId),
+          type: Number(lineType),
+          name: lineName + Math.floor(Math.random() * 10000),
+          point: newLineSet,
+          crowd: generateRandomArray(3),
+          speed: Math.random(100),
+        };
+        line.push(l);
+        for (let i = 0; i < newPolylineSet.length; i++) {
+          map.removeLayer(newPolylineSet[i]);
+        }
+        let polyline = L.polyline(newLineSet, {
+          color: "#c00808",
+          weight: 8,
+        }).addTo(map);
+        polylineSet.push(polyline);
+        for (let i = 0; i < markerSet.length; i++) {
+          markerSet[i].snapediting.addGuideLayer(polyline);
+        }
+        newLineSet = [];
+        newPolylineSet = [];
+      }
+
+      function endarea() {
+        areaId++;
+        $(".area-id").val(areaId);
+        let a = {
+          id: areaId,
+          type: Number(areaType),
+          name: areaName + Math.floor(Math.random() * 10000),
+          point: newAreaSet,
+          eval: generateIntRandomArray(5),
+        };
+        area.push(a);
+        map.removeLayer(newPolygonSet);
+        let polygon = L.polygon(newAreaSet, { color: "#66ccff" }).addTo(map);
+        polygonSet.push(polygon);
+        for (let i = 0; i < markerSet.length; i++) {
+          markerSet[i].snapediting.addGuideLayer(polygon);
+        }
+        newAreaSet = [];
+        newPolygonSet = [];
+      }
+
+      function generateRandomArray(length) {
+        let randomArray = new Array(length)
+          .fill(0)
+          .map(() => Math.random());
+
+        // let sum = randomArray.reduce((acc, val) => acc + val, 0);
+        // let lastNumber = 1 - sum;
+        // randomArray.push(lastNumber);
+        return randomArray;
+      }
+
+      function generateIntRandomArray(length) {
+        let randomArray = new Array(length)
+          .fill(0)
+          .map(() => Math.floor(Math.random()*10000));
+
+        return randomArray;
+      }
+
+      const normalizedRandomArray = generateNormalizedRandomArray(5);
+      console.log(normalizedRandomArray);
+    </script>
+  </body>
+</html>
