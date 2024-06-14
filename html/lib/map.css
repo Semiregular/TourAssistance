@@ -1,0 +1,123 @@
+:root {
+  --color-pink: rgb(255, 226, 231);
+  --color-red: rgb(214, 31, 31);
+}
+
+.leaflet-popup-content-wrapper{
+  background-color: transparent;
+  padding: 0;
+  box-shadow: 0 0 0 0;
+}
+.leaflet-popup-tip-container{
+  margin-top: -14px;
+}
+
+.leaflet-popup-close-button{
+  margin-top: 12px;
+  margin-left: 6px;
+}
+
+.leaflet-popup-close-button span{
+  color: var(--color-red);
+}
+
+.leaflet-popup-tip{
+  background-color: var(--color-red);
+}
+
+.popup-main {
+  width: 320px;
+  height: 150px;
+  padding-left: 10px;
+  display: flex;
+  background-image: url("./images/user.jpg");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 98% 98%;
+  border-radius: 8px;
+}
+
+.popup-left {
+  width: 100px;
+  height: 100%;
+  margin-left: -10px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.popup-right {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  padding: 10px;
+  width: 210px;
+  height: calc(100% - 20px);
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.popup-name {
+  width: 100%;
+  font-weight: 600;
+  font-size: 16px;
+  height: 20px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.popup-detail {
+  width: 100%;
+  margin-top: 10px;
+  height: calc(100% - 60px);
+  font-size: 14px;
+  font-family: "仿宋";
+  user-select: none;
+}
+
+.popup-btn {
+  margin-top: 10px;
+  display: flex;
+  width: 100%;
+  height: 20px;
+  justify-content: space-around;
+  user-select: none;
+  color: #c00808;
+}
+
+.popup-btn-item {
+  width: 60px;
+  padding: 3px;
+  height: 14px;
+  font-size: 12px;
+  border-radius: 10px;
+  text-align: center;
+  color: var(--color-red);
+  cursor: pointer;
+  border: 1px solid var(--color-red);
+  transition: all 0.1s ease;
+}
+
+.popup-btn-item:nth-child(3){
+  background-color: var(--color-red);
+  color: white;
+}
+
+.popup-btn-item:hover{
+  box-shadow: 0 4px 4px rgba(0,0,0,0.1);
+  color: white;
+  background-color: var(--color-red);
+  transition: all 0.1s ease;
+}
+
+.popup-btn-item:nth-child(3):hover{
+  transition: all 0.1s ease;
+  box-shadow: 0 4px 4px rgba(0,0,0,0.1);
+}
+
+
+.popup-img {
+  max-width: 100%;
+  width: auto;
+  min-height: 100%;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}

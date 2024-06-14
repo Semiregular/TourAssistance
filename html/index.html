@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>游学导航</title>
+    <script src="./libs/leaflet.js"></script>
+    <script src="./libs/leaflet.geometryutil.js"></script>
+    <script src="./libs/leaflet.snap.js"></script>
+    <script src="./libs/leaflet.draw.js"></script>
+    <script src="./libs/leaflet.markercluster.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="./lib/map.js"></script>
+    <script src="./lib/login.js"></script>
+    <script src="./lib/index.js"></script>
+    <script src="./lib/note.js"></script>
+    <link rel="stylesheet" href="./libs/leaflet.css" />
+    <link rel="stylesheet" href="./libs/leaflet.draw.css" />
+    <link rel="stylesheet" href="./libs/MarkerCluster.css" />
+    <link rel="stylesheet" href="./libs/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="./lib/index.css" />
+    <link rel="stylesheet" href="./lib/login.css" />
+    <link rel="stylesheet" href="./lib/map.css" />
+    <link rel="stylesheet" href="./lib/note.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- 左侧 sidebar -->
+      <div class="window-control">
+        <div class="window-control-button" id="min">
+          <img src="./lib/images/min.png" alt="" />
+        </div>
+        <div class="window-control-button" id="max">
+          <img src="./lib/images/max.png" alt="" />
+        </div>
+        <div class="window-control-button" id="close">
+          <img src="./lib/images/close_red.png" id="close-icon" alt="" />
+        </div>
+      </div>
+      <div class="sidebar left-sidebar">
+        <div class="top-nav">
+          <div class="top-nav-button">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+          </div>
+          <div class="top-nav-title">游学导航</div>
+        </div>
+        <!-- 左侧导航 -->
+
+        <div class="left-nav left-nav-hide">
+          <div class="user">
+            <div class="user-img"></div>
+            <div class="user-info">
+              <div class="user-name">
+                <a href="#" class="link-login">未登录</a>
+              </div>
+              <div class="user-desc">系统原装签名</div>
+            </div>
+          </div>
+          <div class="left-nav-item left-nav-item-active">搜索景点</div>
+          <div class="left-nav-item">出行规划</div>
+          <div class="left-nav-item">我的日记</div>
+        </div>
+        <div class="left-panel">
+          <!-- 左侧导航栏 -->
+
+          <div class="left-panel-item">
+            <div class="search">
+              <input
+                class="search-input"
+                id="search-point-input"
+                value="名称"
+                placeholder="搜索景点"
+              />
+              <div class="search-icon"></div>
+            </div>
+            <div class="types-list">
+              <div class="types-list-item types-list-item-active">热度</div>
+              <div class="types-list-item">评价</div>
+            </div>
+            <div class="type-list">
+              <div class="type-list-item type-list-item-active">全部</div>
+              <div class="type-list-item">景区</div>
+              <div class="type-list-item">餐厅</div>
+              <div class="type-list-item">厕所</div>
+              <div class="type-list-item">公园</div>
+              <div class="type-list-item">商城</div>
+              <div class="type-list-item">酒店</div>
+              <div class="type-list-item">医院</div>
+              <div class="type-list-item">便利店</div>
+              <div class="type-list-item">银行</div>
+              <div class="type-list-item">电影院</div>
+              <div class="type-list-item">博物馆</div>
+            </div>
+            <div class="point-list"></div>
+          </div>
+
+          <div class="left-panel-item">
+            <div class="travel">
+              <div class="travel-type">
+                <div class="travel-type-item travel-type-item-active">综合</div>
+                <div class="travel-type-item">公交</div>
+                <div class="travel-type-item">骑行</div>
+                <div class="travel-type-item">步行</div>
+              </div>
+              <div class="travel-types">
+                <div class="travel-types-item travel-types-item-active">最短路程</div>
+                <div class="travel-types-item">最短时间</div>
+              </div>
+              <div class="travel-search">
+                <input
+                  class="travel-search-input"
+                  id="search-travel-start-input"
+                  placeholder="选择起点"
+                />
+                <input
+                  class="travel-search-input"
+                  id="search-travel-end-input"
+                  placeholder="选择终点"
+                />
+                <input
+                  class="travel-search-input"
+                  id="search-travel-multi-input"
+                  placeholder="选择多点"
+                />
+              </div>
+            </div>
+            <div class="route-list"></div>
+          </div>
+
+          <div class="left-panel-item">
+            <div class="user-note-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地图 -->
+      <div class="middle-container">
+        <div class="middle-top"></div>
+        <div class="map map-extend" id="map"></div>
+      </div>
+
+      <!-- 右侧 sidebar -->
+
+      <div class="sidebar right-sidebar right-sidebar-hide">
+        <div class="right-panel right-panel-hide">
+          <div class="right-panel-item">
+            <div class="info-point-image">
+              <div class="info-point-name">建筑经典</div>
+            </div>
+            <div class="info-point-eval">
+              <div class="info-point-eval-item">
+                <div class="info-point-eval-mark">5.0</div>
+                <div class="info-point-eval-length"></div>
+              </div>
+              <div class="info-point-eval-item">
+                <div class="info-point-eval-mark">4.0</div>
+                <div class="info-point-eval-length"></div>
+              </div>
+              <div class="info-point-eval-item">
+                <div class="info-point-eval-mark">3.0</div>
+                <div class="info-point-eval-length"></div>
+              </div>
+              <div class="info-point-eval-item">
+                <div class="info-point-eval-mark">2.0</div>
+                <div class="info-point-eval-length"></div>
+              </div>
+              <div class="info-point-eval-item">
+                <div class="info-point-eval-mark">1.0</div>
+                <div class="info-point-eval-length"></div>
+              </div>
+            </div>
+            <div class="info-point-detail">详细信息</div>
+            <div class="point-note-list"></div>
+          </div>
+          <div class="right-panel-item">
+            <div class="search-note">
+                <input class="search-note-input" placeholder="全文搜索" />             
+                <div class="search-note-icon"></div>
+            </div>
+            <div class="read-note"></div>
+          </div>
+          <div class="right-panel-item">
+            <div class="write-note">
+              <div class="write-note-title label-text">标题：</div>
+              <input class="write-note-title-input input" />
+              <div class="write-note-tag label-text">标签：</div>
+              <input class="write-note-tag-input input" />
+              <div class="write-note-content label-text">内容：</div>
+              <textarea class="write-note-content-input"></textarea>
+              <div class="write-note-button">发布(*^▽^*)</div>
+            </div>
+          </div>
+        </div>
+        <div class="right-tool">
+          <div class="right-tool-item"></div>
+          <div class="right-tool-item"></div>
+          <dic class="right-tool-item"></dic>
+        </div>
+      </div>
+
+      <!-- 登录界面弹窗 -->
+      <div class="login-mask">
+        <div class="login">
+          <button class="quxiao">取消</button>
+          <h2>登录</h2>
+          <div class="input-box">
+            <label for="text">账号</label>
+            <input class="input login-acco" type="text" name="" id="" />
+          </div>
+          <div class="input-box">
+            <label for="password">密码</label>
+            <input class="input login-pwd" type="password" name="" id="" />
+          </div>
+          <div class="input-box">
+            <a href="#" style="text-decoration: none">忘记密码?</a>
+            <div class="loginbutton">
+              <button class="login-button">登录</button>
+              <button class="login-button">注册</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 注册界面弹窗 -->
+      <div class="register-mask">
+        <div class="register">
+          <div class="quxiao-fanhui">
+            <button class="fanhui">返回</button>
+            <button class="quxiao">取消</button>
+          </div>
+          <h2>注册</h2>
+          <div class="input-box">
+            <label for="text">账号</label>
+            <input class="input acco" type="text" name="" id="" />
+          </div>
+          <div class="input-box">
+            <label for="password">密码</label>
+            <input class="input pwd1" type="password" name="" id="" />
+          </div>
+          <div class="input-box">
+            <label for="password">确认密码</label>
+            <input class="input pwd2" type="password" name="" id="" />
+          </div>
+          <div class="input-box">
+            <div class="registerbutton">
+              <button class="register-button">注册</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let isRightCollapsed = true;
+      let isLeftCollapsed = true;
+      let rightToolType = 0;
+      let point = [];
+      let pageCurrent = 1;
+      let pageSize = 5;
+      let orderType = 1;
+      let startPoint = 9;
+      let endPoint = 10;
+      let travelType = 14;
+      let travelTypeF = 4;
+      let travelTypeS = 1;
+      let curRouteLayer = [];
+      var curPoint = 0;
+      let curNote = 0;
+      let idxUser = 0;
+      let tolUserPage = 0;
+      let tolPointPage = 0;
+      let userName;
+      let remoteAddr = "http://8.130.117.173:3000";
+      let normalPointGroup = [];
+      let specialPointGroup = [];
+      var normalLayer;
+      var specialLayer;
+      let searchType = 10;
+      let searchTypeF = 0;
+      let searchTypeS = 1;
+      let routePointList = [9,10];
+      let routePointListName;
+
+      $(document).ready(function () {
+        idxUser =
+          sessionStorage.getItem("idxUser") === null
+            ? 0
+            : sessionStorage.getItem("idxUser");
+        userName =
+          sessionStorage.getItem("userName") === null
+            ? ""
+            : sessionStorage.getItem("userName");
+        if (idxUser !== 0) {
+          $(".link-login").text(userName);
+        }
+        $("#close").hover(
+          function () {
+            $("#close-icon").attr("src", "./lib/images/close_white.png");
+          },
+          function () {
+            $("#close-icon").attr("src", "./lib/images/close_red.png");
+          }
+        );
+        $(".right-tool-item").click(function () {
+          let curToolType = $(this).index();
+          collapseRight(curToolType);
+        });
+        $(".top-nav-button").click(function () {
+          collapseLeft();
+        });
+        $(".leaflet-draw-toolbar").hide();
+        $(".travel-type-item").click(function () {
+          let curItem = $(this).index();
+          changeTravelType(curItem);
+        });
+        $(".travel-types-item").click(function () {
+          let curItem = $(this).index();
+          changeTravelTypes(curItem);
+        });
+        $(".left-nav-item").click(function () {
+          let curItem = $(this).index() - 1;
+          changeLeft(curItem);
+        });
+        $(".left-panel-item").hide();
+        $(".left-panel-item:eq(0)").show();
+        $(".search-icon").on("click", function () {
+          let curInput = $("#search-point-input");
+          let value = curInput.val();
+          if (value) {
+            let type;
+            if(searchTypeF == 0){
+              type = 2;
+            }else{
+              type = 5;
+            }
+            let key = value;
+            searchPoint(type, key);
+          }else{
+            let type ;
+            if(searchTypeF == 0){
+              type = 4;
+            }else{
+              type = 3;
+            }
+            type = 10 * searchTypeS + type;
+            searchPoint(type, "1111");
+          }
+        });
+        $(".search-note-icon").click(function () {
+          searchMark();
+        });
+        $(".type-list-item").click(function () {
+          let curItem = $(this).index();
+          changeSearchType(curItem);
+        });
+        $(".types-list-item").click(function () {
+          let curItem = $(this).index();
+          changeSearchTypes(curItem);
+        });
+        $("#search-point-input").change(function () {
+          if (this.value) {
+            let type;
+            if(searchTypeF == 0){
+              type = 2;
+            }else{
+              type = 5;
+            }
+            let key = this.value;
+            searchPoint(type, key);
+          }else{
+            let type ;
+            if(searchTypeF == 0){
+              type = 4;
+            }else{
+              type = 3;
+            }
+            type = 10 * searchTypeS + type;
+            searchPoint(type, "1111");
+          }
+        });
+        $(".travel-search-input").on("keypress", function (event) {
+          var keyCode = event.keyCode || event.which;
+          if (keyCode === 13) {
+            event.preventDefault();
+            getRoute();
+          }
+        });
+        $(".write-note-button").on("click", function () {
+          //console.log("click");
+          if (
+            $(".write-note-title-input").val() &&
+            $(".write-note-content-input").val() &&
+            $(".write-note-tag-input").val()
+          ) {
+           //if (curNote === 0) {
+              insertNote();
+           // } else {
+           //   updateNote();
+           // } 
+          } else {
+            alert("请填写完整");
+          }
+        });
+
+        $.ajax({
+          url: remoteAddr + "/point/list/all",
+          type: "GET",
+          data: "",
+          success: function (res) {
+            point = res;
+            drawPoint();
+            searchPoint(1, "名称");
+          },
+        });
+        getRoute();
+      });
+
+      // 图层初始化
+      var layer = L.tileLayer(
+        "https://dialogue-oss.oss-cn-wulanchabu.aliyuncs.com/wuhan/{z}/{x}/{y}/x={x}&y={y}&z={z}.png",
+        {
+          attribution: "游学地图",
+          minZoom:10
+        }
+      );
+
+      var moreLayer = L.tileLayer(
+        "https://dialogue-oss.oss-cn-wulanchabu.aliyuncs.com/wuchang/{z}/{x}/{y}/x={x}&y={y}&z={z}.png",
+        {
+          attribution: "游学地图",
+        }
+      );
+
+      // 地图初始化
+      var map = L.map("map", {
+        drawControl: true,
+        attributionControl: false,
+        center: [30.564410857717522, 114.3299961090088],
+        layers: [layer],
+        maxZoom: 17,
+        zoom: 13,
+      });
+
+      let markerCluster = new L.MarkerClusterGroup();
+      let moreCluster = new L.MarkerClusterGroup();
+
+      const baseLayers = {
+        '主地图': layer,
+        '景区图': moreLayer
+      };
+
+      var overlays;
+      var layerControl;
+    </script>
+  </body>
+</html>

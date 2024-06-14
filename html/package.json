@@ -1,0 +1,61 @@
+{
+  "name": "tourguide",
+  "version": "1.0.0",
+  "description": "tour",
+  "main": "main.js",
+  "scripts": {
+    "build": "electron-builder --win --x64",
+    "elec": "electron .",
+    "open": "start index.html",
+    "server": "node server.js",
+    "start": "npm-run-all --parallel server open",
+    "win": "npm-run-all --parallel server elec"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "build": {
+    "appId": "tour",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "nsis": {
+      "oneClick": false,
+      "language": "2052",
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "./build/favicon.ico",
+      "uninstallerIcon": "./build/favicon.ico",
+      "installerHeaderIcon": "./build/favicon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "./build/favicon.ico",
+      "target": [
+        "nsis",
+        "zip"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^29.1.4",
+    "electron-builder": "^24.13.3",
+    "npm-run-all": "^4.1.5"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.3",
+    "gsap": "^3.12.5",
+    "js-cookie": "^3.0.5",
+    "mysql2": "^3.9.2"
+  }
+}
